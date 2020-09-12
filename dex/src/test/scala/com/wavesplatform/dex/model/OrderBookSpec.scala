@@ -414,41 +414,41 @@ class OrderBookSpec
       Table(
         ("M amount", "T amount", "is T market", "fee settings", "M order fee", "T order fee", "T fee asset", "M executed fee", "T executed fee"),
         /** symmetric */
-        (1.TN, 1.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.003.TN), // like in old good times
-        (1.TN, 1.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
+        (1.TN, 1.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.003.TN), // like in old good times
+        (1.TN, 1.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
         /** small maker - big taker */
-        (2.TN, 10.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.0006.TN), // like in old good times
-        (2.TN, 10.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.0018.TN), // orders have sufficient fee = 0.009.TN
+        (2.TN, 10.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.0006.TN), // like in old good times
+        (2.TN, 10.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.0018.TN), // orders have sufficient fee = 0.009.TN
         /** big maker - small taker */
-        (10.TN, 2.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.0006.TN, 0.003.TN), // like in old good times
-        (10.TN, 2.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.0002.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
+        (10.TN, 2.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.0006.TN, 0.003.TN), // like in old good times
+        (10.TN, 2.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.0002.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
         /** symmetric, taker is market */
-        (1.TN, 1.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.003.TN), // like in old good times
-        (1.TN, 1.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
+        (1.TN, 1.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.003.TN), // like in old good times
+        (1.TN, 1.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
         /** small maker - big market taker */
-        (2.TN, 10.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.0006.TN), // like in old good times
-        (2.TN, 10.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.0018.TN), // orders have sufficient fee = 0.009.TN
+        (2.TN, 10.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.003.TN, 0.0006.TN), // like in old good times
+        (2.TN, 10.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.001.TN, 0.0018.TN), // orders have sufficient fee = 0.009.TN
         /** big maker - small market taker */
-        (10.TN, 2.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.0006.TN, 0.003.TN), // like in old good times
-        (10.TN, 2.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.0002.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
+        (10.TN, 2.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.003, Waves, 0.0006.TN, 0.003.TN), // like in old good times
+        (10.TN, 2.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.009, Waves, 0.0002.TN, 0.009.TN), // orders have sufficient fee = 0.009.TN
         /** symmetric, taker fee in ETH */
-        (1.TN, 1.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00001703.eth), // like in old good times
-        (1.TN, 1.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (1.TN, 1.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00001703.eth), // like in old good times
+        (1.TN, 1.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
         /** small maker - big taker, taker fee in ETH */
-        (2.TN, 10.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00000340.eth), // like in old good times
-        (2.TN, 10.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00001021.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (2.TN, 10.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00000340.eth), // like in old good times
+        (2.TN, 10.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00001021.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
         /** big maker - small taker, taker fee in ETH */
-        (10.TN, 2.TN, false, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.0006.TN, 0.00001703.eth), // like in old good times
-        (10.TN, 2.TN, false, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.0002.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (10.TN, 2.TN, false, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.0006.TN, 0.00001703.eth), // like in old good times
+        (10.TN, 2.TN, false, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.0002.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
         /** symmetric, taker is market, taker fee in ETH */
-        (1.TN, 1.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00001703.eth), // like in old good times
-        (1.TN, 1.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (1.TN, 1.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00001703.eth), // like in old good times
+        (1.TN, 1.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00005109.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
         /** small maker - big market taker, taker fee in ETH */
-        (2.TN, 10.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00000340.eth), // like in old good times
-        (2.TN, 10.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00001021.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (2.TN, 10.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.003.TN, 0.00000340.eth), // like in old good times
+        (2.TN, 10.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.001.TN, 0.00001021.eth), // orders have sufficient fee = 0.009.TN = 0.00005109.eth
         /** big maker - small market taker, taker fee in ETH */
-        (10.TN, 2.TN, true, DynamicSettings(0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.0006.TN, 0.00001703.eth), // like in old good times
-        (10.TN, 2.TN, true, DynamicSettings(0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.0002.TN, 0.00005109.eth) // orders have sufficient fee = 0.009.TN = 0.00005109.eth
+        (10.TN, 2.TN, true, DynamicSettings(mkAssetId("TN"), 0.003.TN, 0.003.TN), 0.003.TN, 0.00001703, eth, 0.0006.TN, 0.00001703.eth), // like in old good times
+        (10.TN, 2.TN, true, DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.009.TN), 0.009.TN, 0.00005109, eth, 0.0002.TN, 0.00005109.eth) // orders have sufficient fee = 0.009.TN = 0.00005109.eth
       )
       // format: off
     ) { (mAmt: Long, tAmt: Long, isTMarket: Boolean, ofs: OrderFeeSettings, orderMFee: Long, orderTFee: Double, tFeeAsset: Asset, eMFee: Long, eTFee: Long) =>

@@ -121,10 +121,10 @@ class FeeSpecification
       }
     }
 
-    "submitted order v3 " when List(1, 2).foreach { counterVersion =>
+    "submitted order v3 - 2 " when List(1, 2).foreach { counterVersion =>
       s"counter order v$counterVersion" in {
-        val counter   = LimitOrder(createOrder(wavesUsdPair, BUY, amount = 88947718687647L, price = 934300L, matcherFee = 4000000L, version = 2.toByte))
-        val submitted = LimitOrder(createOrder(wavesUsdPair, SELL, amount = 50000000L, price = 932500L, matcherFee = 4000000L, version = 3.toByte))
+        val counter   = LimitOrder(createOrder(wavesUsdPair, BUY, amount = 88947718687647L, price = 934300L, matcherFee = 10000L, version = 2.toByte))
+        val submitted = LimitOrder(createOrder(wavesUsdPair, SELL, amount = 50000000L, price = 932500L, matcherFee = 10000L, version = 3.toByte))
 
         val feeSettings          = DynamicSettings.symmetric(mkAssetId("7RB3BWayeCVPq3kkpkeJZAFv2DYCB5gEwnutEpRofaw4"), 10000L)
         val (makerFee, takerFee) = Fee.getMakerTakerFee(feeSettings)(submitted, counter)

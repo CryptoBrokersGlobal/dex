@@ -438,7 +438,7 @@ class MatcherApiRouteSpec extends RouteSpec("/matcher") with MatcherSpecBase wit
       apiKeyHash = Some(crypto secureHash apiKey),
       rateCache = rateCache,
       validatedAllowedOrderVersions = () => Future.successful { Set(1, 2, 3) },
-      () => DynamicSettings.symmetric(matcherFee)
+      () => DynamicSettings.symmetric(mkAssetId("TN"), matcherFee)
     ).route
 
     f(route)
