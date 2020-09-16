@@ -49,6 +49,7 @@ object OrderFeeSettings {
     val maxBaseFee: Long   = math.max(baseMakerFee, baseTakerFee)
     val makerRatio: Double = (BigDecimal(baseMakerFee) / maxBaseFee).toDouble
     val takerRatio: Double = (BigDecimal(baseTakerFee) / maxBaseFee).toDouble
+    //println("OrderFeeSettings.scala-52: setting DS: assetID: " + defaultAsset + " - maxBaseFee: " + maxBaseFee + " - makerRatio: " + makerRatio + " - takerRatio: " + takerRatio)
   }
 
   object DynamicSettings {

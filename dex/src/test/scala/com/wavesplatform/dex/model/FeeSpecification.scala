@@ -117,7 +117,7 @@ class FeeSpecification
         val (makerFee, takerFee) = Fee.getMakerTakerFee(feeSettings)(submitted, counter)
 
         takerFee shouldBe 0.04.TN
-        makerFee shouldBe 0L
+        makerFee shouldBe 0.04.TN
       }
     }
 
@@ -129,8 +129,8 @@ class FeeSpecification
         val feeSettings          = DynamicSettings.symmetric(mkAssetId("7RB3BWayeCVPq3kkpkeJZAFv2DYCB5gEwnutEpRofaw4"), 10000L)
         val (makerFee, takerFee) = Fee.getMakerTakerFee(feeSettings)(submitted, counter)
 
-        takerFee shouldBe 0.01
-        makerFee shouldBe 0L
+        takerFee shouldBe 10000L
+        makerFee shouldBe 0
       }
     }
 
