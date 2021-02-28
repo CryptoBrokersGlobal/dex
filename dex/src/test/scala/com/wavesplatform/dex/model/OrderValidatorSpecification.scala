@@ -166,7 +166,7 @@ class OrderValidatorSpecification
 
         forAll(preconditions) {
           case (order, matcherFeeAssetId) =>
-            validateByMatcherSettings(DynamicSettings.symmetric(matcherFee), Set(matcherFeeAssetId))(order) should produce("FeeAssetBlacklisted")
+            validateByMatcherSettings(DynamicSettings.symmetric(matcherFeeAssetId, matcherFee), Set(matcherFeeAssetId))(order) should produce("FeeAssetBlacklisted")
         }
       }
 
@@ -198,7 +198,7 @@ class OrderValidatorSpecification
 
       "matcherFeeAssetId doesn't meet matcher's settings requirements (dynamic mode and incorrect asset)" in {
         forAll(orderV3WithPredefinedFeeAssetGenerator()) {
-          case (_, order) => validateByMatcherSettings(DynamicSettings.symmetric(order.matcherFee))(order) should produce("UnexpectedFeeAsset")
+          case (_, order) => validateByMatcherSettings(DynamicSettings.symmetric(mkAssetId("TN"), order.matcherFee))(order) should produce("UnexpectedFeeAsset")
         }
       }
 
@@ -208,7 +208,7 @@ class OrderValidatorSpecification
 
         val order = Json.fromJson[Order](createOrder(AssetPair(btc, usd), SELL, 100, 3.0).json() ++ Json.obj("matcherFeeAssetId" -> "TN")).get
 
-        validateByMatcherSettings { DynamicSettings.symmetric(0.003.TN) }(order).left.get.message.text should include(
+        validateByMatcherSettings { DynamicSettings.symmetric(mkAssetId("TN"), 0.003.TN) }(order).left.get.message.text should include(
           """But given "TN" as Base58 string. Remove this field if you want to specify TN in JSON"""
         )
       }
@@ -244,7 +244,7 @@ class OrderValidatorSpecification
 
       "matcherFee is not enough (dynamic mode)" in {
         val validateByDynamicSettings: Order => Result[Order] =
-          validateByMatcherSettings(DynamicSettings.symmetric(0.04.TN), rateCache = rateCache)
+          validateByMatcherSettings(DynamicSettings.symmetric(mkAssetId("7RB3BWayeCVPq3kkpkeJZAFv2DYCB5gEwnutEpRofaw4"), 10000L), rateCache = rateCache)
 
         /**
           * asset rate = price of 1 TN in that asset;
@@ -268,7 +268,7 @@ class OrderValidatorSpecification
         def validateFeeByBlockchain(priceAssetScript: Option[RunScriptResult] = None,
                                     matcherScript: Option[RunScriptResult] = None): Order => Result[Order] = { order =>
           awaitResult {
-            validateByBlockchain { DynamicSettings.symmetric(0.04.TN) }(priceAssetScript = priceAssetScript,
+            validateByBlockchain { DynamicSettings.symmetric(mkAssetId("TN"), 0.04.TN) }(priceAssetScript = priceAssetScript,
                                                                             matcherAccountScript = matcherScript,
                                                                             matcherFeeAssetScript = priceAssetScript,
                                                                             rateCache = rateCache)(order)
@@ -351,7 +351,7 @@ class OrderValidatorSpecification
 
       "order's price is out of deviation bounds (market aware)" in {
         val deviationSettings = DeviationsSettings(enabled = true, maxPriceProfit = 50, maxPriceLoss = 70, maxFeeDeviation = 50)
-        val orderFeeSettings  = DynamicSettings.symmetric(0.003.TN)
+        val orderFeeSettings  = DynamicSettings.symmetric(mkAssetId("TN"), 0.003.TN)
 
         val buyOrder  = createOrder(wavesBtcPair, OrderType.BUY, amount = 250.TN, price = 0.00011081)
         val sellOrder = createOrder(wavesBtcPair, OrderType.SELL, amount = 250.TN, price = 0.00011081)
@@ -535,7 +535,7 @@ class OrderValidatorSpecification
         }
 
         def validate(allowedOrderVersions: Set[Byte]): Order => Result[Order] = {
-          validateByMatcherSettings(DynamicSettings.symmetric(0.003.TN), allowedOrderVersions = allowedOrderVersions)
+          validateByMatcherSettings(DynamicSettings.symmetric(mkAssetId("TN"),0.003.TN), allowedOrderVersions = allowedOrderVersions)
         }
 
         validate { Set(1) } { orderOfVersion(2) } should produce("OrderVersionDenied")
@@ -573,7 +573,7 @@ class OrderValidatorSpecification
         def orderWith(amount: Long, price: Double): Order = createOrder(wavesUsdPair, OrderType.BUY, amount, price)
 
         def validateByAmountAndPrice(orderRestrictions: Map[AssetPair, OrderRestrictionsSettings] = orderRestrictions): Order => Result[Order] =
-          order => awaitResult { validateByBlockchain(DynamicSettings.symmetric(0.003.TN), orderRestrictions)()(order) }
+          order => awaitResult { validateByBlockchain(DynamicSettings.symmetric(mkAssetId("TN"), 0.003.TN), orderRestrictions)()(order) }
 
         validateByAmountAndPrice() { orderWith(amount = 50.TN, price = 3) } shouldBe 'right
 
@@ -603,7 +603,7 @@ class OrderValidatorSpecification
       "matcherFee is too small according to rate of fee asset" in {
 
         val rateCache: RateCache                   = RateCache.inMem
-        val validateByRate: Order => Result[Order] = validateByMatcherSettings(DynamicSettings.symmetric(0.003.TN), rateCache = rateCache)
+        val validateByRate: Order => Result[Order] = validateByMatcherSettings(DynamicSettings.symmetric(mkAssetId("TN"),0.003.TN), rateCache = rateCache)
         val order: Order                           = createOrder(wavesUsdPair, BUY, 1.TN, 3.00, 0.01.usd, feeAsset = usd)
 
         withClue("USD rate = 3.33, fee should be >= 0.01 usd\n") {
@@ -704,11 +704,11 @@ class OrderValidatorSpecification
           createOrder(wavesUsdPair, BUY, 1.TN, 3.0, matcherFee = fee, feeAsset = feeAsset)
 
         def validateByFee(makerFee: Long, takerFee: Long)(order: Order): Result[Order] =
-          validateByMatcherSettings(DynamicSettings(makerFee, takerFee), rateCache = rateCache)(order)
+          validateByMatcherSettings(DynamicSettings(mkAssetId("TN"),makerFee, takerFee), rateCache = rateCache)(order)
 
         def validateByFeeWithScript(makerFee: Long, takerFee: Long)(order: Order): Result[Order] =
           awaitResult {
-            validateByBlockchain(DynamicSettings(makerFee, takerFee))(
+            validateByBlockchain(DynamicSettings(mkAssetId("TN"), makerFee, takerFee))(
               matcherAccountScript = Some(RunScriptResult.Allowed),
               rateCache = rateCache
             )(order)
@@ -927,7 +927,7 @@ class OrderValidatorSpecification
         tc.createTransaction,
         MatcherAccount,
         ntpTime,
-        DynamicSettings.symmetric(matcherFee),
+        DynamicSettings.symmetric(mkAssetId("TN"),matcherFee),
         matcherSettings.orderRestrictions,
         assetDescriptions,
         rateCache,
@@ -963,7 +963,7 @@ class OrderValidatorSpecification
                                         matcherSettings,
                                         getDefaultAssetDescriptions(_).decimals,
                                         rateCache,
-                                        DynamicSettings.symmetric(matcherFee))
+                                        DynamicSettings.symmetric(mkAssetId("TN"), matcherFee))
   }
 
   private def validateByMatcherSettings(orderFeeSettings: OrderFeeSettings,

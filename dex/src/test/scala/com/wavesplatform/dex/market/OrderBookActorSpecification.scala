@@ -398,8 +398,8 @@ class OrderBookActorSpecification
       val makerTakerFeeAtOffset = Fee.getMakerTakerFeeByOffset(
         new OrderFeeSettingsCache(
           Map(
-            0L -> DynamicSettings(0.001.TN, 0.003.TN),
-            1L -> DynamicSettings(0.001.TN, 0.005.TN)
+            0L -> DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.003.TN),
+            1L -> DynamicSettings(mkAssetId("TN"), 0.001.TN, 0.005.TN)
           ))) _
 
       obcTestWithPrepare(prepare = (_, _) => (), makerTakerFeeAtOffset = makerTakerFeeAtOffset) { (pair, orderBook, tp) =>
@@ -416,7 +416,7 @@ class OrderBookActorSpecification
         tp.expectMsgType[OrderAdded]
 
         val oe = tp.expectMsgType[OrderExecuted]
-        oe.counterExecutedFee shouldBe 0.006.TN
+        oe.counterExecutedFee shouldBe 0.008.TN
         oe.submittedExecutedFee shouldBe 0.005.TN
       }
     }

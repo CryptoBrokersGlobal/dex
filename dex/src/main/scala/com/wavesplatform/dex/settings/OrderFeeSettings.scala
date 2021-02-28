@@ -25,6 +25,7 @@ object OrderFeeSettings {
         this match {
           case ds: DynamicSettings =>
             "dynamic" -> Json.obj(
+              "assetId" -> ds.assetId,
               "baseFee" -> (ds.maxBaseFee + matcherAccountFee),
               "rates"   -> ratesJson
             )
@@ -43,14 +44,16 @@ object OrderFeeSettings {
     }
   }
 
-  final case class DynamicSettings(baseMakerFee: Long, baseTakerFee: Long) extends OrderFeeSettings {
+  final case class DynamicSettings(defaultAsset: Asset, baseMakerFee: Long, baseTakerFee: Long) extends OrderFeeSettings {
+    val assetId: Asset    = defaultAsset
     val maxBaseFee: Long   = math.max(baseMakerFee, baseTakerFee)
     val makerRatio: Double = (BigDecimal(baseMakerFee) / maxBaseFee).toDouble
     val takerRatio: Double = (BigDecimal(baseTakerFee) / maxBaseFee).toDouble
+    //println("OrderFeeSettings.scala-52: setting DS: assetID: " + defaultAsset + " - maxBaseFee: " + maxBaseFee + " - makerRatio: " + makerRatio + " - takerRatio: " + takerRatio)
   }
 
   object DynamicSettings {
-    def symmetric(baseFee: Long): DynamicSettings = DynamicSettings(baseFee, baseFee)
+    def symmetric(defaultAsset: Asset, baseFee: Long): DynamicSettings = DynamicSettings(defaultAsset, baseFee, baseFee)
   }
 
   final case class FixedSettings(defaultAsset: Asset, minFee: Long)      extends OrderFeeSettings
@@ -64,6 +67,7 @@ object OrderFeeSettings {
     def validateDynamicSettings: ErrorsListOr[DynamicSettings] = {
       val prefix = getPrefixByMode(FeeMode.DYNAMIC)
       (
+        cfgValidator.validate[Asset](s"$prefix.asset"),
         cfgValidator.validateByPredicate[Long](s"$prefix.base-maker-fee")(predicate = fee => 0 < fee, errorMsg = s"required 0 < base maker fee"),
         cfgValidator.validateByPredicate[Long](s"$prefix.base-taker-fee")(predicate = fee => 0 < fee, errorMsg = s"required 0 < base taker fee"),
       ) mapN DynamicSettings.apply

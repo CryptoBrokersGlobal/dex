@@ -356,13 +356,13 @@ trait MatcherSpecBase extends NTPTime with DiffMatcherWithImplicits with DoubleO
   protected def fixedSettingsGenerator(defaultAsset: Asset, lowerMinFeeBound: Long = 1, upperMinFeeBound: Long = 1000000L): Gen[FixedSettings] =
     for { minFee <- Gen.choose(lowerMinFeeBound, upperMinFeeBound) } yield { FixedSettings(defaultAsset, minFee) }
 
-  protected def dynamicSettingsGenerator(lowerBaseFeeBound: Long = 1, upperBaseFeeBound: Long = 1000000L): Gen[DynamicSettings] =
-    for { baseFee <- Gen.choose(lowerBaseFeeBound, upperBaseFeeBound) } yield { DynamicSettings(baseFee, baseFee) }
+  protected def dynamicSettingsGenerator(defaultAsset: Asset, lowerBaseFeeBound: Long = 1, upperBaseFeeBound: Long = 1000000L): Gen[DynamicSettings] =
+    for { baseFee <- Gen.choose(lowerBaseFeeBound, upperBaseFeeBound) } yield { DynamicSettings(defaultAsset, baseFee, baseFee) }
 
   private def orderFeeSettingsGenerator(defaultAssetForFixedSettings: Option[Asset] = None): Gen[OrderFeeSettings] = {
     for {
       defaultAsset     <- defaultAssetForFixedSettings.fold(arbitraryAssetGen)(_.fold(arbitraryAssetGen)(Gen.const))
-      orderFeeSettings <- Gen.oneOf(dynamicSettingsGenerator(), fixedSettingsGenerator(defaultAsset), percentSettingsGenerator)
+      orderFeeSettings <- Gen.oneOf(dynamicSettingsGenerator(defaultAsset), fixedSettingsGenerator(defaultAsset), percentSettingsGenerator)
     } yield orderFeeSettings
   }
 
@@ -405,9 +405,10 @@ trait MatcherSpecBase extends NTPTime with DiffMatcherWithImplicits with DoubleO
           .updateFee {
             OrderValidator.getMinValidFeeForSettings(order, percentSettings, getDefaultAssetDescriptions(_).decimals, rateCache).explicitGet()
           }
-      case (_, ds @ DynamicSettings(_, _)) =>
+      case (_, ds @ DynamicSettings(defaultAssetId, _, _)) =>
         order
-          .updateFeeAsset(matcherFeeAssetForDynamicSettings getOrElse Waves)
+          .updateFeeAsset(defaultAssetId)
+          /** .updateFeeAsset(matcherFeeAssetForDynamicSettings getOrElse Waves) */
           .updateFee(
             rateForDynamicSettings.fold(ds.maxBaseFee) { rate =>
               OrderValidator.multiplyFeeByDouble(ds.maxBaseFee, rate)

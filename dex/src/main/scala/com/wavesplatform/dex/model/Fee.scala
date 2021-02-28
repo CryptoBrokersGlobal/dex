@@ -51,6 +51,18 @@ object Fee {
         else (sellExecutedFee, buyExecutedFee)
 
       case settings: DynamicSettings =>
+        val fee = absoluteFee(
+          totalCounterFee = multiplyFeeByDouble(c.matcherFee, settings.makerRatio),
+          totalSubmittedFee = multiplyFeeByDouble(s.matcherFee, settings.takerRatio)
+        )
+
+        println("Fee.scala-59: OrderFeeSettings: " + ofs)
+        println("Fee.scala-60: AcceptedOrder: " + s)
+        println("Fee.scala-61: LimitOrder: " + c)
+        println("Fee.scala-62: counterFee: " + c.matcherFee + " - makerRatio: " + settings.makerRatio + " - totalCounterFee: " + multiplyFeeByDouble(c.matcherFee, settings.makerRatio))
+        println("Fee.scala-63: submittedFee: " + s.matcherFee + " - takerRatio: " + settings.takerRatio + " - totalSubmittedFee: " + multiplyFeeByDouble(s.matcherFee, settings.takerRatio))
+        println("Fee.scala-64: absoluteFee: " + fee)
+
         absoluteFee(
           totalCounterFee = multiplyFeeByDouble(c.matcherFee, settings.makerRatio),
           totalSubmittedFee = multiplyFeeByDouble(s.matcherFee, settings.takerRatio)

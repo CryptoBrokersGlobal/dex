@@ -14,7 +14,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.{ScalaCheckPropertyChecks => PropertyChecks}
 
 class FeeSpecification
-    extends AnyWordSpec
+  extends AnyWordSpec
     with Matchers
     with MatcherSpecBase
     with BeforeAndAfterAll
@@ -26,7 +26,7 @@ class FeeSpecification
     "expensive feeAsset" when {
 
       def test(submittedType: OrderType, submittedAmount: Long, submittedFee: Long, orderVersion: Int)(countersAmounts: Long*)(
-          expectedSubmittedMatcherFees: Long*): Unit = {
+        expectedSubmittedMatcherFees: Long*): Unit = {
 
         require(countersAmounts.length == expectedSubmittedMatcherFees.length)
 
@@ -50,7 +50,7 @@ class FeeSpecification
         val denormalizedCounterAmounts  = countersAmounts.map(Denormalization.denormalizeAmountAndFee(_, 8))
 
         // taker / maker -> maker / taker
-        val getFee = Fee.getMakerTakerFee(OrderFeeSettings.DynamicSettings(0.04.TN, 0.08.TN)) _
+        val getFee = Fee.getMakerTakerFee(OrderFeeSettings.DynamicSettings(mkAssetId("Very expensive asset"), 0.04.TN, 0.08.TN)) _
 
         s"S: $submittedType $submittedDenormalizedAmount, C: ${denormalizedCounterAmounts.mkString("[", ", ", "]")}" in {
           counterOrders
@@ -113,12 +113,26 @@ class FeeSpecification
         val counter   = LimitOrder(createOrder(wavesUsdPair, BUY, amount = 88947718687647L, price = 934300L, matcherFee = 4000000L, version = 2.toByte))
         val submitted = LimitOrder(createOrder(wavesUsdPair, SELL, amount = 50000000L, price = 932500L, matcherFee = 4000000L, version = 3.toByte))
 
-        val feeSettings          = DynamicSettings.symmetric(4000000L)
+        val feeSettings          = DynamicSettings.symmetric(mkAssetId("TN"), 4000000L)
         val (makerFee, takerFee) = Fee.getMakerTakerFee(feeSettings)(submitted, counter)
 
         takerFee shouldBe 0.04.TN
-        makerFee shouldBe 0L
+        makerFee shouldBe 0.04.TN
       }
     }
+
+    "submitted order v3 - 2 " when List(1, 2).foreach { counterVersion =>
+      s"counter order v$counterVersion" in {
+        val counter   = LimitOrder(createOrder(wavesUsdPair, BUY, amount = 88947718687647L, price = 934300L, matcherFee = 10000L, version = 2.toByte))
+        val submitted = LimitOrder(createOrder(wavesUsdPair, SELL, amount = 50000000L, price = 932500L, matcherFee = 10000L, version = 3.toByte))
+
+        val feeSettings          = DynamicSettings.symmetric(mkAssetId("7RB3BWayeCVPq3kkpkeJZAFv2DYCB5gEwnutEpRofaw4"), 10000L)
+        val (makerFee, takerFee) = Fee.getMakerTakerFee(feeSettings)(submitted, counter)
+
+        takerFee shouldBe 10000L
+        makerFee shouldBe 0
+      }
+    }
+
   }
 }

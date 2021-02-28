@@ -64,7 +64,7 @@ object OrderValidator extends ScorexLogging {
   }
 
   private def verifyOrderByAccountScript(blockchain: AsyncBlockchain, address: Address, order: Order)(
-      implicit ec: ExecutionContext): FutureResult[Unit] = {
+    implicit ec: ExecutionContext): FutureResult[Unit] = {
 
     lazy val verifyAddressScript: FutureResult[Unit] = {
 
@@ -88,7 +88,7 @@ object OrderValidator extends ScorexLogging {
   }
 
   private def verifySmartToken(blockchain: AsyncBlockchain, asset: IssuedAsset, tx: ExchangeTransaction, hasAssetScript: Asset => Boolean)(
-      implicit ec: ExecutionContext): FutureResult[Unit] = {
+    implicit ec: ExecutionContext): FutureResult[Unit] = {
 
     lazy val verifySmartAssetScript: FutureResult[Unit] = {
 
@@ -118,8 +118,8 @@ object OrderValidator extends ScorexLogging {
   }
 
   private def validateAmountAndPrice(order: Order, decimalsPair: (Int, Int), orderRestrictions: Map[AssetPair, OrderRestrictionsSettings])(
-      implicit ec: ExecutionContext,
-      efc: ErrorFormatterContext): FutureResult[Order] = {
+    implicit ec: ExecutionContext,
+    efc: ErrorFormatterContext): FutureResult[Order] = {
 
     if (!(orderRestrictions contains order.assetPair)) liftValueAsync(order)
     else {
@@ -133,17 +133,17 @@ object OrderValidator extends ScorexLogging {
       liftValueAsync(order)
         .ensure(error.OrderInvalidAmount(order, restrictions)) { o =>
           normalizeAmount(restrictions.minAmount) <= o.amount && o.amount <= normalizeAmount(restrictions.maxAmount) &&
-          o.amount % normalizeAmount(restrictions.stepAmount).max(1) == 0
+            o.amount % normalizeAmount(restrictions.stepAmount).max(1) == 0
         }
         .ensure(error.OrderInvalidPrice(order, restrictions)) { o =>
           normalizePrice(restrictions.minPrice) <= o.price && o.price <= normalizePrice(restrictions.maxPrice) &&
-          o.price % normalizePrice(restrictions.stepPrice).max(1) == 0
+            o.price % normalizePrice(restrictions.stepPrice).max(1) == 0
         }
     }
   }
 
   private[dex] def checkOrderVersion(version: Byte, isFeatureActivated: Short => Future[Boolean])(
-      implicit ec: ExecutionContext): FutureResult[Byte] = {
+    implicit ec: ExecutionContext): FutureResult[Byte] = {
 
     def checkFeatureSupport(feature: BlockchainFeature): FutureResult[Byte] = {
       liftFutureAsync { isFeatureActivated(feature.id) }
@@ -159,15 +159,15 @@ object OrderValidator extends ScorexLogging {
   }
 
   def blockchainAware(
-      blockchain: AsyncBlockchain,
-      transactionCreator: ExchangeTransactionCreator.CreateTransaction,
-      matcherAddress: Address,
-      time: Time,
-      orderFeeSettings: OrderFeeSettings,
-      orderRestrictions: Map[AssetPair, OrderRestrictionsSettings],
-      assetDescriptions: Asset => BriefAssetDescription,
-      rateCache: RateCache,
-      hasMatcherAccountScript: Boolean)(order: Order)(implicit ec: ExecutionContext, efc: ErrorFormatterContext): FutureResult[Order] =
+                       blockchain: AsyncBlockchain,
+                       transactionCreator: ExchangeTransactionCreator.CreateTransaction,
+                       matcherAddress: Address,
+                       time: Time,
+                       orderFeeSettings: OrderFeeSettings,
+                       orderRestrictions: Map[AssetPair, OrderRestrictionsSettings],
+                       assetDescriptions: Asset => BriefAssetDescription,
+                       rateCache: RateCache,
+                       hasMatcherAccountScript: Boolean)(order: Order)(implicit ec: ExecutionContext, efc: ErrorFormatterContext): FutureResult[Order] =
     timer.measure {
 
       import ExchangeTransactionCreator.minFee
@@ -216,7 +216,10 @@ object OrderValidator extends ScorexLogging {
 
   private[dex] def getValidFeeAssetForSettings(order: Order, orderFeeSettings: OrderFeeSettings, rateCache: RateCache): Set[Asset] =
     orderFeeSettings match {
-      case _: DynamicSettings               => rateCache.getAllRates.keySet
+      case DynamicSettings(defaultAssetId, _, _) => {
+        rateCache.getAllRates.keySet
+        Set(defaultAssetId)
+      }
       case FixedSettings(defaultAssetId, _) => Set(defaultAssetId)
       case PercentSettings(assetType, _) =>
         Set(
@@ -278,7 +281,7 @@ object OrderValidator extends ScorexLogging {
   }
 
   private def validateFee(order: Order, orderFeeSettings: OrderFeeSettings, assetDecimals: Asset => Int, rateCache: RateCache)(
-      implicit efc: ErrorFormatterContext): Result[Order] = {
+    implicit efc: ErrorFormatterContext): Result[Order] = {
     getMinValidFeeForSettings(order, orderFeeSettings, assetDecimals, rateCache) flatMap { requiredFee =>
       cond(order.matcherFee >= requiredFee, order, error.FeeNotEnough(requiredFee, order.matcherFee, order.feeAsset))
     }
@@ -319,7 +322,7 @@ object OrderValidator extends ScorexLogging {
     *   best ask = lowest price of sell
     */
   private def validatePriceDeviation(order: Order, deviationSettings: DeviationsSettings, marketStatus: Option[MarketStatus])(
-      implicit efc: ErrorFormatterContext): Result[Order] = {
+    implicit efc: ErrorFormatterContext): Result[Order] = {
 
     def isPriceInDeviationBounds(subtractedPercent: Double, addedPercent: Double): Boolean = marketStatus forall { ms =>
       lazy val isPriceHigherThanMinDeviation = ms.bestBid forall { bestBid =>
@@ -381,7 +384,7 @@ object OrderValidator extends ScorexLogging {
   }
 
   def marketAware(orderFeeSettings: OrderFeeSettings, deviationSettings: DeviationsSettings, marketStatus: Option[MarketStatus])(order: Order)(
-      implicit efc: ErrorFormatterContext): Result[Order] =
+    implicit efc: ErrorFormatterContext): Result[Order] =
     if (deviationSettings.enabled) {
       for {
         _ <- validatePriceDeviation(order, deviationSettings, marketStatus)
@@ -392,16 +395,16 @@ object OrderValidator extends ScorexLogging {
   def timeAware(time: Time)(order: Order): Result[Order] = {
     for {
       _ <- cond(order.expiration > time.correctedTime + MinExpiration,
-                (),
-                error.WrongExpiration(time.correctedTime(), MinExpiration, order.expiration))
+        (),
+        error.WrongExpiration(time.correctedTime(), MinExpiration, order.expiration))
       _ <- order.isValid(time.correctedTime()).toEither.leftMap(error.OrderCommonValidationFailed)
     } yield order
   }
 
   private def validateBalance(
-      acceptedOrder: AcceptedOrder,
-      tradableBalance: Asset => Long,
-      orderBookCache: AssetPair => OrderBook.AggregatedSnapshot)(implicit efc: ErrorFormatterContext): Result[AcceptedOrder] = {
+                               acceptedOrder: AcceptedOrder,
+                               tradableBalance: Asset => Long,
+                               orderBookCache: AssetPair => OrderBook.AggregatedSnapshot)(implicit efc: ErrorFormatterContext): Result[AcceptedOrder] = {
 
     /**
       * According to the current market state calculates cost for buy market orders or amount for sell market orders
@@ -466,7 +469,7 @@ object OrderValidator extends ScorexLogging {
                         activeOrderCount: => Int,
                         orderExists: ByteStr => Boolean,
                         orderBookCache: AssetPair => OrderBook.AggregatedSnapshot)(acceptedOrder: AcceptedOrder)(
-      implicit efc: ErrorFormatterContext): Result[AcceptedOrder] =
+                         implicit efc: ErrorFormatterContext): Result[AcceptedOrder] =
     for {
       _ <- lift(acceptedOrder)
         .ensure(error.UnexpectedSender(acceptedOrder.order.sender.toAddress, sender))(_.order.sender.toAddress == sender)
